@@ -1,18 +1,21 @@
-from models.auth import *
+from app.models.auth import *
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter
 
 
-baseUrl = "/api/auth"
+router = APIRouter()
 
-@router.post(f"{baseUrl}/login")
-def login(login_request: login_request) -> JSONResponse:
+@router.post("/login")
+def login(req: login_request) -> JSONResponse:
     '''
-    Login
+    Login duh
     '''
-    return []
+    return {"message": "logged in"}
 
 
-@router.post(f"{baseUrl}/register")
-def register(register_request: register_request) -> JSONResponse:
+@router.post("/register")
+def register(req: register_request) -> JSONResponse:
     '''
+    Registers a user
     '''
-    return
+    return {"message": "registered"}
