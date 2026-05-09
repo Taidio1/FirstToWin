@@ -38,11 +38,8 @@ SERVER_HOST = parse_str("SERVER_HOST")
 SERVER_PORT = parse_int("SERVER_PORT")
 
 # Database settings
-# DB_HOST = parse_str("DB_HOST")
-# DB_PORT = parse_int("DB_PORT")
-# DB_NAME = parse_str("DB_NAME")
-# DB_USER = parse_str("DB_USER")
-# DB_PASSWORD = parse_str("DB_PASSWORD")
+DB_URL = parse_str("DB_URL")
+
 
 # Development settings
 DEBUG = parse_bool("DEBUG")
