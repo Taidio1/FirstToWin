@@ -160,3 +160,14 @@ Niniejszy dokument zawiera listę endpointów API wymaganych przez interfejs uż
   payload_size: number;
 }
 ```
+# Konfiguracja API
+Do odpalenia backendu potrzebne są dane środowiskowe w pliku .env:
+- DB_URL
+- SERVER_HOST
+- SERVER_PORT
+
+## Migracje
+Aplikowanie migracji (backend project root):
+```bash
+alembic upgrade head
+```
