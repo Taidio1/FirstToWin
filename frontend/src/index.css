@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background:
+      radial-gradient(60% 40% at 80% -10%, rgba(91, 157, 255, 0.10), transparent 60%),
+      radial-gradient(40% 30% at 0% 100%, rgba(239, 68, 68, 0.08), transparent 60%),
+      #080b14;
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(91, 157, 255, 0.35);
+  }
+
+  /* Scrollbar — slim and dark */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1c2540;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2a345a;
+    background-clip: padding-box;
+    border: 2px solid transparent;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-ink-700/70 bg-ink-900/60 backdrop-blur-sm;
+  }
+
+  .panel-elevated {
+    @apply rounded-2xl border border-ink-700/70 bg-gradient-to-b from-ink-800/80 to-ink-900/60 shadow-lg shadow-black/30;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-400;
+  }
+
+  .kbd {
+    @apply inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-ink-600 bg-ink-800 px-1 font-mono text-[10px] text-slate-300;
+  }
+}
