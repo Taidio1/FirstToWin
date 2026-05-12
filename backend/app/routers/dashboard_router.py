@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 from app.db.db import get_db
 from fastapi import APIRouter, Depends
 from app.middleware.auth import get_current_user
+from sqlalchemy import select, func
+from app.db.entities.alert import Alert
+from datetime import datetime, timedelta
 router = APIRouter()
 
 
@@ -20,4 +23,14 @@ def dashboard_stats(
     - severity linear timeline
     - list of top sources
     '''
-    return
+    from_date = datetime.now() - timedelta(hours=24)
+    query_alerts_24 = select(func.count()).select_from(
+        Alert).where(Alert.created_at > from_date)
+    query_critical_alerts = select(func.count()).select_from(Alert).where(
+        Alert.severity == "critical")
+    alerts_24 = db.execute(query_alerts_24)
+    critical_alerts = db.execute(query_critical_alerts)
+    return {
+        "last_24h_alerts": alerts_24,
+        "critical_alerts": critical_alerts
+    }

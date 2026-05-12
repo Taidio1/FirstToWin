@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, Boolean
+from sqlalchemy import String, Integer, Boolean, Enum, ForeignKey
 from app.db.db import Base
 import enum
 
@@ -18,16 +18,52 @@ class Severity(str, enum.Enum):
     critical = "critical"
 
 
+class ProtocolEnum(str, enum.Enum):
+    TCP = "TCP"
+    UDP = "UDP"
+    ICMP = "ICMP"
+    OTHER = "OTHER"
+
+
+class Match(Base):
+    __tablename__ = "matches"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    rule_id: Mapped[int] = mapped_column(
+        ForeignKey("rules.id"),
+        unique=True,
+        nullable=False
+    )
+    rule: Mapped["Rule"] = relationship(
+        "Rule",
+        back_populates="match"
+    )
+
+    src_ip: Mapped[str | None] = mapped_column(String, nullable=True)
+    dst_ip: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    dst_port: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    protocol: Mapped[ProtocolEnum] = mapped_column(
+        Enum(ProtocolEnum),
+        nullable=False
+    )
+
+    threshold: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    window_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
 class Rule(Base):
     __tablename__ = "rules"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    type: Mapped[enum.Enum] = mapped_column(
-        enum.Enum(RuleType), nullable=False)
+    type: Mapped[RuleType] = mapped_column(
+        Enum(RuleType), nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    severity: Mapped[enum.Enum] = mapped_column(
-        enum.Enum(Severity), nullable=False)
+    severity: Mapped[Severity] = mapped_column(
+        Enum(Severity), nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
-    match = relationship("RuleMatch", back_populates="rule",
-                         uselist=False, cascade="all, delete")
+    match = relationship("Match", back_populates="rule",
+                         uselist=False, cascade="all, delete-orphan")

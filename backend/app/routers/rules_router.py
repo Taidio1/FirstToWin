@@ -1,13 +1,16 @@
-from fastapi import APIRouter, Depends
-from app.models.rule_model import create_rule_request, update_rule_request
+from fastapi import APIRouter, Depends, HTTPException
+from app.models.rule_model import create_rule_request
 from sqlalchemy.orm import Session
 from app.db.db import get_db
-
+from app.db.entities import Rule, User
+from app.middleware.auth import get_current_user
+from app.db.entities import Match, ProtocolEnum, Severity, RuleType
 router = APIRouter()
 
 
 @router.get("")
-def get(db: Session = Depends(get_db)):
+def get(db: Session = Depends(get_db),
+        user: User = Depends(get_current_user)):
     '''
     Get all rules
     '''
@@ -15,24 +18,72 @@ def get(db: Session = Depends(get_db)):
 
 
 @router.post("")
-def create(req: create_rule_request, db: Session = Depends(get_db)):
+def create(req: create_rule_request,
+           db: Session = Depends(get_db),
+           user: User = Depends(get_current_user)):
     '''
     Create a new rule
     '''
-    return
+
+    match = Match(
+        src_ip=req.match.src_ip,
+        dst_ip=req.match.dst_ip,
+        dst_port=req.match.dst_port,
+        protocol=ProtocolEnum(req.match.protocol),
+        threshold=req.match.threshold,
+        window_seconds=req.match.window_seconds
+    )
+
+    rule = Rule(
+        name=req.name,
+        type=RuleType(req.type),
+        enabled=req.enabled,
+        severity=Severity(req.severity),
+        description=req.description,
+    )
+
+    rule.match = match
+    db.add(rule)
+    db.flush()
+    db.refresh(rule)
+    return rule
 
 
 @router.put("/{id}")
-def update(id: int, req: create_rule_request, db: Session = Depends(get_db)):
+def update(id: int,
+           req: create_rule_request,
+           db: Session = Depends(get_db),
+           user: User = Depends(get_current_user)):
     '''
     Update an existing rule
     '''
-    return
+    rule = db.get(Rule, id)
+    if rule is None:
+        raise HTTPException(status_code=404, detail="Rule not found")
+
+    rule.name = req.name
+    rule.type = req.type
+    rule.enabled = req.enabled
+    rule.severity = req.severity
+    rule.description = req.description
+    rule.match = req.match
+
+    db.commit()
+    db.refresh(rule)
+
+    return rule
 
 
 @router.delete("/{id}")
-def delete(id: int):
+def delete(id: int,
+           db: Session = Depends(get_db),
+           user: User = Depends(get_current_user)):
     '''
     Delete a rule
     '''
-    return
+    rule = db.get(Rule, id)
+    if rule is None:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    db.delete(rule)
+    db.commit()
+    return {"message": "Rule deleted"}
