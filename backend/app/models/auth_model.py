@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 from datetime import datetime
-from app.models.user import User
+from app.models.user_model import User
 
 @dataclass
 class login_response:
