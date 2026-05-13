@@ -1,22 +1,21 @@
 from pydantic import BaseModel
-from typing import Literal
+from app.shared_models import Severity, RuleType, Protocol
 
 
 class match(BaseModel):
     src_ip: str | None = None
     dst_ip: str | None = None
     dst_port: int | None = None
-    protocol: Literal["TCP", "UDP", "ICMP", "OTHER"]
+    protocol: Protocol
     threshold: int | None = None
     window_seconds: int | None = None
 
 
 class create_rule_request(BaseModel):
     name: str
-    type: Literal["blacklist_ip", "blacklist_ip",
-                  "connection_threshold", "port_scan", "protocol_filter"]
+    type: RuleType
     enabled: bool
-    severity: Literal["critical", "high", "medium", "low", "info"]
+    severity: Severity
     match: match
     description: str
 
@@ -25,7 +24,7 @@ class MatchResponse(BaseModel):
     src_ip: str | None
     dst_ip: str | None
     dst_port: int | None
-    protocol: str
+    protocol: Protocol
     threshold: int | None
     window_seconds: int | None
 
@@ -38,7 +37,7 @@ class RuleResponse(BaseModel):
     name: str
     type: str
     enabled: bool
-    severity: str
+    severity: Severity
     description: str
 
     match: MatchResponse | None

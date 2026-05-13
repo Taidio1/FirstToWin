@@ -33,10 +33,22 @@ def login(req: login_request,
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials"
         )
+
     access_token = create_access_token({
         "sub": str(user.id)
     })
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "role": user.role,
+            "created_at": user.created_at
+        }
+    }
 
 
 @router.post("/register")
@@ -45,9 +57,20 @@ def register(req: register_request,
     '''
     Registers a user
     '''
+    query = select(User).where(
+        User.email == req.email or User.username == req.username)
+    user = db.scalars(query).one_or_none()
+
+    if user is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User already exists"
+        )
+
     user = User(email=req.email, username=req.username,
                 password=hash_password(req.password), role="viewer")
 
     db.add(user)
     db.commit()
+    db.refresh(user)
     return user

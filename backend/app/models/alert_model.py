@@ -1,16 +1,14 @@
-from dataclasses import dataclass
-from typing import Literal
-from datetime import datetime
-from app.models.user_model import User
 from pydantic import BaseModel
+from app.shared_models import Severity, AlertStatus
 
 
 class paginated_alerts_request(BaseModel):
     page: int
     page_size: int
-    severity: Literal["critical", "high", "medium", "low", "info"]
-    status: Literal["open", "acknowledged", "resolved"]
+    severity: Severity
+    status: AlertStatus
     q: str
 
+
 class alert_patch_request(BaseModel):
-    status: Literal["open", "acknowledged", "resolved"]
+    status: AlertStatus

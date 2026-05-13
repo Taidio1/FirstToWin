@@ -1,23 +1,20 @@
-from dataclasses import dataclass
 from typing import Literal
-from datetime import datetime
 from app.models.user_model import User
+from pydantic import BaseModel
 
-@dataclass
-class login_response:
+
+class login_response(BaseModel):
     access_token: str
     token_type: Literal["bearer"]
     user: User
 
 
-@dataclass
-class login_request:
+class login_request(BaseModel):
     email: str
     password: str
 
 
-@dataclass
-class register_request:
+class register_request(BaseModel):
     email: str
     username: str
     password: str

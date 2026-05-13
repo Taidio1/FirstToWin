@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.models.rule_model import create_rule_request
 from sqlalchemy.orm import Session
 from app.db.db import get_db
-from app.db.entities import Rule, User
+from app.db.entities import Rule, User, Match
 from app.middleware.auth import get_current_user
-from app.db.entities import Match, ProtocolEnum, Severity, RuleType
+from app.shared_models import Protocol, Severity, RuleType
 router = APIRouter()
 
 
@@ -29,7 +29,7 @@ def create(req: create_rule_request,
         src_ip=req.match.src_ip,
         dst_ip=req.match.dst_ip,
         dst_port=req.match.dst_port,
-        protocol=ProtocolEnum(req.match.protocol),
+        protocol=Protocol(req.match.protocol),
         threshold=req.match.threshold,
         window_seconds=req.match.window_seconds
     )
@@ -66,7 +66,13 @@ def update(id: int,
     rule.enabled = req.enabled
     rule.severity = req.severity
     rule.description = req.description
-    rule.match = req.match
+
+    rule.match.src_ip = req.match.src_ip
+    rule.match.dst_ip = req.match.dst_ip
+    rule.match.dst_port = req.match.dst_port
+    rule.match.protocol = Protocol(req.match.protocol)
+    rule.match.threshold = req.match.threshold
+    rule.match.window_seconds = req.match.window_seconds
 
     db.commit()
     db.refresh(rule)

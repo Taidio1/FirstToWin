@@ -1,28 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, Boolean, Enum, ForeignKey
 from app.db.db import Base
-import enum
-
-
-class RuleType(str, enum.Enum):
-    blacklist_ip = "blacklist_ip"
-    connection_threshold = "connection_threshold"
-    port_scan = "port_scan"
-    protocol_filter = "protocol_filter"
-
-
-class Severity(str, enum.Enum):
-    low = "low"
-    medium = "medium"
-    high = "high"
-    critical = "critical"
-
-
-class ProtocolEnum(str, enum.Enum):
-    TCP = "TCP"
-    UDP = "UDP"
-    ICMP = "ICMP"
-    OTHER = "OTHER"
+from app.shared_models import Protocol, Severity, RuleType
 
 
 class Match(Base):
@@ -44,8 +23,8 @@ class Match(Base):
 
     dst_port: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    protocol: Mapped[ProtocolEnum] = mapped_column(
-        Enum(ProtocolEnum),
+    protocol: Mapped[Protocol] = mapped_column(
+        Enum(Protocol),
         nullable=False
     )
 

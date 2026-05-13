@@ -3,8 +3,8 @@ from fastapi import APIRouter, Query, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db.entities.alert import Alert
-from typing import Literal
 from app.middleware.auth import get_current_user
+from app.shared_models import AlertStatus, Severity
 router = APIRouter()
 
 
@@ -13,19 +13,9 @@ def paginated_alerts(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 
-    severity: Literal[
-        "critical",
-        "high",
-        "medium",
-        "low",
-        "info"
-    ] | None = None,
+    severity: Severity | None = None,
 
-    status: Literal[
-        "open",
-        "acknowledged",
-        "resolved"
-    ] | None = None,
+    status: AlertStatus | None = None,
 
     q: str | None = None,
     db: Session = Depends(get_db),

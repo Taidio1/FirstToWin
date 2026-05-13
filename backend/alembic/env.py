@@ -7,7 +7,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from app.settings import DB_URL
-from app.db.entities import User, Alert, NetworkLog, Rule
+from app.db.entities import User, Alert, NetworkLog, Rule, Sensor
 from app.db.db import Base
 
 
