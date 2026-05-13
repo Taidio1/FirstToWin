@@ -1,0 +1,11 @@
+services:
+  api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: ndr-api
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./api/.env
+    restart: unless-stopped
