@@ -1,0 +1,354 @@
+{
+  "info": {
+    "_postman_id": "db613a12-ba8f-4eaa-b6b8-15db1f95f4da",
+    "name": "Projekt Grupowy NDE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "26043222"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"email_example\",\n    \"username\": \"username_example\",\n    \"password\": \"password_example\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Alerts paginated",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/alerts?page=1&page_size=20&severity=low",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "alerts"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "page_size",
+              "value": "20"
+            },
+            {
+              "key": "severity",
+              "value": "low"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Alert single",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/alerts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "alerts",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Alert OSINT",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/alerts/1/osint",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "alerts",
+            "1",
+            "osint"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Alert update",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"status\": \"open\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/alerts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "alerts",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Rules fetch",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/rules",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "rules"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Rule create",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"name_example\",\n    \"type\": \"blacklist_ip\",\n    \"enabled\": true,\n    \"severity\": \"critical\",\n    \"match\": {\n        \"src_ip\": \"8.8.8.8\",\n        \"protocol\": \"TCP\"\n    },\n    \"description\": \"description_example\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rules",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "rules"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Rule update",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/rules/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "rules",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Rule delete",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/rules/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "rules",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dashboard stats",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Network logs paginated",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Sensor create",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/sensors",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sensors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Sensor delete",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/sensors/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sensors",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Sensors get",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/sensors",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "sensors"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzc4NjkyMzY2fQ.0BlGW34YPZqpxmhVxaNNL40eCO53g3y48kkWiyrjSYk",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    }
+  ]
+}
