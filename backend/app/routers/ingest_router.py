@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.db import get_db
@@ -13,13 +14,20 @@ router = APIRouter()
 
 
 @router.post("/logs", status_code=status.HTTP_201_CREATED)
-def ingest_log(req: ingest_log_request, db: Session = Depends(get_db)):
-    sensor = ensure_demo_data(db)
-    if req.sensor_name != sensor.name:
-        sensor = Sensor(name=req.sensor_name, location="local ingest", status="online")
-        db.add(sensor)
-        db.commit()
-        db.refresh(sensor)
+def ingest_log(
+    req: ingest_log_request,
+    db: Session = Depends(get_db),
+    x_sensor_key: str | None = Header(default=None, alias="X-Sensor-Key"),
+):
+    ensure_demo_data(db)
+    sensor = db.scalars(
+        select(Sensor).where(
+            Sensor.name == req.sensor_name,
+            Sensor.api_key == (x_sensor_key or ""),
+        )
+    ).one_or_none()
+    if sensor is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid sensor key")
 
     log = NetworkLog(
         sensor_id=sensor.id,

@@ -40,8 +40,13 @@ def detect_alerts(db: Session, log: NetworkLog, sensor_name: str) -> list[Alert]
                 )
             )
 
-    for alert in alerts:
-        db.add(alert)
+    for index, alert in enumerate(alerts):
+        existing_alert = _find_open_duplicate(db, alert)
+        if existing_alert is None:
+            db.add(alert)
+        else:
+            existing_alert.details = _deduplicated_details(existing_alert.details)
+            alerts[index] = existing_alert
 
     return alerts
 
@@ -102,3 +107,22 @@ def _build_alert(rule: Rule, log: NetworkLog, sensor_name: str, details: str) ->
         sensor_id=sensor_name,
         details=details,
     )
+
+
+def _find_open_duplicate(db: Session, alert: Alert) -> Alert | None:
+    return db.scalars(
+        select(Alert).where(
+            Alert.rule_id == alert.rule_id,
+            Alert.rule_name == alert.rule_name,
+            Alert.status == AlertStatus.open.value,
+            Alert.src_ip == alert.src_ip,
+            Alert.dst_ip == alert.dst_ip,
+            Alert.protocol == alert.protocol,
+        )
+    ).first()
+
+
+def _deduplicated_details(details: str) -> str:
+    base_details = details.split(" Last seen:")[0]
+    last_seen = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    return f"{base_details} Last seen: {last_seen}."

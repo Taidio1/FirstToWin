@@ -157,6 +157,7 @@ def test_ingest_stores_logs_and_creates_port_scan_alert():
     for port in [22, 80, 443, 8080, 8443]:
         response = client.post(
             "/api/ingest/logs",
+            headers={"X-Sensor-Key": "demo-sensor-key"},
             json={
                 "sensor_name": "local-demo-sensor",
                 "src_ip": "10.10.10.30",
@@ -178,3 +179,72 @@ def test_ingest_stores_logs_and_creates_port_scan_alert():
     logs = client.get("/api/logs", params={"page": 1, "page_size": 10}).json()
     assert alerts["total"] >= 1
     assert logs["total"] == 5
+
+
+def test_healthcheck_reports_api_and_database_status():
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "ok",
+        "database": "ok",
+        "version": "0.0.1-dev",
+    }
+
+
+def test_ingest_requires_valid_sensor_key():
+    payload = {
+        "sensor_name": "local-demo-sensor",
+        "src_ip": "10.10.10.31",
+        "dst_ip": "192.168.1.31",
+        "src_port": 52022,
+        "dst_port": 22,
+        "protocol": "TCP",
+        "flags": "S",
+        "payload_size": 64,
+    }
+
+    missing_key = client.post("/api/ingest/logs", json=payload)
+    wrong_key = client.post(
+        "/api/ingest/logs",
+        headers={"X-Sensor-Key": "wrong-key"},
+        json=payload,
+    )
+    valid_key = client.post(
+        "/api/ingest/logs",
+        headers={"X-Sensor-Key": "demo-sensor-key"},
+        json=payload,
+    )
+
+    assert missing_key.status_code == 401
+    assert wrong_key.status_code == 401
+    assert valid_key.status_code == 201
+
+
+def test_port_scan_alert_is_deduplicated_for_same_source_and_rule():
+    for port in [22, 80, 443, 8080, 8443, 9443]:
+        response = client.post(
+            "/api/ingest/logs",
+            headers={"X-Sensor-Key": "demo-sensor-key"},
+            json={
+                "sensor_name": "local-demo-sensor",
+                "src_ip": "10.10.10.32",
+                "dst_ip": "192.168.1.32",
+                "src_port": 53000 + port,
+                "dst_port": port,
+                "protocol": "TCP",
+                "flags": "S",
+                "payload_size": 64,
+            },
+        )
+        assert response.status_code == 201
+
+    alerts = client.get("/api/alerts", params={"page": 1, "page_size": 10}).json()
+    port_scan_alerts = [
+        alert
+        for alert in alerts["items"]
+        if alert["rule_name"] == "Port Scan" and alert["src_ip"] == "10.10.10.32"
+    ]
+
+    assert len(port_scan_alerts) == 1
+    assert "Last seen" in port_scan_alerts[0]["details"]

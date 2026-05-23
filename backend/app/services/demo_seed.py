@@ -6,6 +6,7 @@ from app.helpers.login_helper import hash_password
 from app.shared_models import Protocol, RuleType, SensorStatus, Severity
 
 DEMO_SENSOR_NAME = "local-demo-sensor"
+DEMO_SENSOR_KEY = "demo-sensor-key"
 DEMO_BLACKLIST_IP = "203.0.113.66"
 
 
@@ -17,10 +18,13 @@ def ensure_demo_data(db: Session) -> Sensor:
         sensor = Sensor(
             name=DEMO_SENSOR_NAME,
             location="local demo",
+            api_key=DEMO_SENSOR_KEY,
             status=SensorStatus.online,
         )
         db.add(sensor)
         db.flush()
+    elif sensor.api_key != DEMO_SENSOR_KEY:
+        sensor.api_key = DEMO_SENSOR_KEY
 
     user = db.scalars(
         select(User).where(User.email == "demo@example.local")
