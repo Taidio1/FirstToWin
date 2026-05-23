@@ -16,6 +16,7 @@ import { extractError } from '@/services/api';
 import { useToast } from '@/contexts/ToastContext';
 import { AlertItem, AlertStatus, Severity } from '@/types';
 import { timeAgo } from '@/lib/utils';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 const PAGE_SIZE = 20;
 
@@ -50,6 +51,10 @@ export default function Alerts() {
     queryKey: ['alerts', filters],
     queryFn: () => listAlerts(filters),
   });
+
+  useAutoRefresh(() => {
+    void refetch();
+  }, 5000);
 
   useEffect(() => {
     if (focusId && data) {

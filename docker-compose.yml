@@ -38,11 +38,34 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_USE_MOCK: "false"
+        VITE_API_BASE_URL: /api
     container_name: ndr-frontend
     ports:
       - "3000:80"
     depends_on:
       - backend
+    restart: unless-stopped
+
+  simulator:
+    image: python:3.14
+    container_name: ndr-live-simulator
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts:ro
+    command: python scripts/live_simulator.py
+    environment:
+      LIVE_BACKEND_URL: http://backend:8000
+      LIVE_SENSOR_KEY: demo-sensor-key
+      LIVE_NORMAL_INTERVAL_SECONDS: 5
+      LIVE_THREAT_INTERVAL_SECONDS: 30
+      LIVE_THREAT_TYPES: port-scan,ssh-bruteforce,blacklist
+    depends_on:
+      backend:
+        condition: service_started
+    profiles:
+      - live
     restart: unless-stopped
 
 volumes:

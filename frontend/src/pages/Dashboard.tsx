@@ -19,6 +19,7 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { fetchDashboardStats } from '@/services/dashboard';
 import { listAlerts } from '@/services/alerts';
 import { timeAgo } from '@/lib/utils';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 function formatNumber(n: number) {
   return new Intl.NumberFormat('en-US').format(n);
@@ -29,13 +30,16 @@ export default function Dashboard() {
   const stats = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: fetchDashboardStats,
-    refetchInterval: 30_000,
   });
   const recent = useQuery({
     queryKey: ['alerts', { page: 1, page_size: 6 }],
     queryFn: () => listAlerts({ page: 1, page_size: 6 }),
-    refetchInterval: 20_000,
   });
+
+  useAutoRefresh(() => {
+    void stats.refetch();
+    void recent.refetch();
+  }, 5000);
 
   if (stats.isLoading || !stats.data) return <FullPageSpinner label="Loading SOC dashboard…" />;
   const s = stats.data;
