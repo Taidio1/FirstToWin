@@ -1,5 +1,6 @@
+from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, Boolean, Enum, ForeignKey
+from sqlalchemy import DateTime, String, Integer, Boolean, Enum, ForeignKey, func
 from app.db.db import Base
 from app.shared_models import Protocol, Severity, RuleType
 
@@ -44,5 +45,9 @@ class Rule(Base):
     severity: Mapped[Severity] = mapped_column(
         Enum(Severity), nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
+    hit_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     match = relationship("Match", back_populates="rule",
                          uselist=False, cascade="all, delete-orphan")

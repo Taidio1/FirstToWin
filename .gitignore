@@ -6,3 +6,6 @@ __pycache__/
 backend/.env
 backend/.emv
 backend/.ev
+
+# typescript build cache
+*.tsbuildinfo

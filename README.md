@@ -1,38 +1,116 @@
-# NDR (Network Detection and Response) - Projekt Zespołowy
+# NDR — Network Detection and Response
 
-## 📖 O projekcie
-Projekt realizowany w ramach przedmiotu "Projekt zespołowy". 
-Celem projektu jest zaprojektowanie i implementacja systemu NDR, którego zadaniem jest monitorowanie ruchu sieciowego, wykrywanie anomalii i potencjalnych zagrożeń bezpieczeństwa oraz umożliwienie reakcji na zidentyfikowane incydenty.
+System do monitorowania ruchu sieciowego, wykrywania anomalii i reagowania na incydenty bezpieczeństwa. Projekt zespołowy realizowany w ramach przedmiotu "Projekt Zespołowy".
 
-System rozwiązuje problem braku przejrzystości w sieciach lokalnych oraz opóźnień w detekcji ataków (takich jak skanowanie portów, ataki DDoS, czy nieautoryzowany ruch). Użytkownikami docelowymi systemu są administratorzy sieci oraz analitycy SOC (Security Operations Center).
+## Zespół — First To Win
 
-## 👥 Zespół i podział prac
+| Osoba | Rola |
+|-------|------|
+| Kacper | Project Manager & Frontend Developer |
+| Jonasz | Security Engineer (silnik detekcji, OSINT, parsowanie pakietów) |
+| Kuba | Security Engineer (scenariusze ataku, red/blue teaming) |
+| Bartek | Backend Developer |
+| Oskar | Data Analyst (normalizacja logów, statystyki anomalii) |
+| Łukasz | Technical Writer & QA |
 
-Nasz zespół składa się z 6 osób. Każdy członek zespołu ma przypisaną konkretną rolę, aby zapewnić płynną realizację projektu:
-* **Kacper (Project Manager & Backend Developer)** - Koordynacja prac zespołu w systemie do zarządzania zadaniami, projektowanie architektury backendowej, API oraz logiki biznesowej.
-* **Kuba (Head of IT Security)** - Opracowywanie reguł detekcji, projektowanie mechanizmów bezpieczeństwa oraz weryfikacja systemu pod kątem odporności na ataki.
-* **Jonasz (Head of IT Security)** - Analiza wektorów ataków, tworzenie scenariuszy testowych (Red/Blue teaming) oraz wsparcie w logice detekcji zagrożeń.
-* **Bartek (Frontend Developer)** - Projektowanie i implementacja interfejsu użytkownika (dashboardów, tabel z alertami) z naciskiem na UX/UI.
-* **Oskar (Data Analyst)** - Przetwarzanie logów sieciowych, wykrywanie anomalii statystycznych i tworzenie modeli/skryptów do kategoryzacji ruchu.
-* **Łukasz (Technical Writer, Integrator & Presenter)** - Tworzenie i utrzymanie dokumentacji projektu, integracja modułów (sklejanie backendu z frontendem/analityką), przygotowanie ostatecznej prezentacji oraz instrukcji wdrożeniowych.
+## Architektura
 
-## ⚙️ Główne funkcjonalności (MVP)
+```
+Sensor / Symulator ──► POST /api/ingest/logs (X-Sensor-Key)
+                              │
+                    detection_engine.py
+                              │
+                    ┌─────────┴─────────┐
+                 NetworkLogs         Alerts (deduplikacja)
+                    └─────────┬─────────┘
+                          FastAPI REST
+                              │
+                       React Dashboard
+```
 
-1.  **Zarządzanie sensorami sieciowymi:** System umożliwia rejestrację, autoryzację (np. za pomocą kluczy API) monitorowanie statusu "sensorów" (skryptów nasłuchujących/urządzeń), które przesyłają logi do głównego serwera.
-2.  **Dashboard (Interfejs Użytkownika):** Przejrzysty panel wyświetlający statystyki sieciowe i krytyczne alerty w czasie rzeczywistym.
-3.  **Operacje CRUD:** Możliwość dodawania, edytowania i usuwania reguł detekcji (np. blokowanie konkretnych adresów IP).
-4.  **Przechowywanie danych:** Zapisywanie logów sieciowych i historii alertów w bazie danych.
-5.  **Walidacja danych:** Sprawdzanie poprawności formatów (np. adresów IP, masek podsieci) przy wprowadzaniu nowych reguł.
-6.  **Integracja z Threat Intelligence** (OSINT) Gdy sensor przesyła logi z nieznanym adresem IP z zewnątrz, Nasz backend odpytuje darmowe API (np. AbuseIPDB, VirusTotal lub AlienVault OTX), aby sprawdzić, czy ten adres IP nie znajduje się na globalnych czarnych listach
-7.  **Interaktywna Wizualizacja Grafowa (Network Graph)** Wizualizacja topologii sieci w formie interaktywnego grafu
+**Stack:**
 
-## 🏗️ Architektura i technologie
-*(Tu uzupełnijcie technologie, na które się zdecydujecie)*
+| Warstwa | Technologia |
+|---------|-------------|
+| Backend | Python 3.12, FastAPI, SQLAlchemy, Alembic |
+| Baza danych | PostgreSQL 17 |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS |
+| Sensor | Python, Scapy (opcjonalnie), symulator HTTP |
+| Deployment | Docker Compose |
 
-* **Backend:** np. Python (FastAPI / Django) lub Node.js
-* **Frontend:** np. React / Vue.js
-* **Baza danych:** np. PostgreSQL / MongoDB / Elasticsearch (do logów)
-* **Analiza Danych:** np. Pandas, narzędzia do analizy PCAP
-* **Zarządzanie projektem:** np. Jira / GitHub
+## Szybki start
 
-## 🚀 Instrukcja uruchomienia (Lokalnie)
+```powershell
+docker compose up --build -d
+```
+
+Usługi po uruchomieniu:
+
+| Usługa | Adres |
+|--------|-------|
+| Frontend (dashboard) | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| Swagger / OpenAPI | http://localhost:8000/docs |
+| Healthcheck | http://localhost:8000/api/health |
+
+### Dane logowania demo
+
+| Pole | Wartość |
+|------|---------|
+| Email | `demo@example.local` |
+| Hasło | `demo1234` |
+| Klucz sensora | `demo-sensor-key` |
+
+Dane demo (użytkownik, sensor, reguły) są tworzone automatycznie przy starcie backendu.
+
+## Symulacja ataku
+
+Po uruchomieniu stacka wyślij scenariusz demo:
+
+```powershell
+# pojedyncze scenariusze
+python scripts/simulate_attack.py --type port-scan
+python scripts/simulate_attack.py --type ssh-bruteforce
+python scripts/simulate_attack.py --type blacklist
+
+# pełne demo end-to-end
+python scripts/simulate_attack.py --type full-demo
+```
+
+Alerty pojawiają się w dashboardzie automatycznie (auto-refresh co 5 s).
+
+## Tryb live demo
+
+Kontener symulatora wysyła ruch cyklicznie bez ręcznej interwencji:
+
+```powershell
+docker compose --profile live up --build -d
+```
+
+## Attack Lab (UI)
+
+Zakładka **Attack Lab** w interfejsie pozwala wyzwalać scenariusze bezpośrednio z przeglądarki — bez wychodzenia do terminala. Dostępny tryb automatyczny (co N sekund) i ręczne uruchamianie konkretnych scenariuszy.
+
+## Sprawdzenie przed prezentacją
+
+```powershell
+python scripts/smoke_demo.py
+```
+
+Skrypt weryfikuje healthcheck, logowanie, dashboard i wzrost liczby alertów po symulacji.
+
+## Testy backendu
+
+```powershell
+cd backend
+python -m pytest -q
+```
+
+## Dokumentacja
+
+| Dokument | Zawartość |
+|----------|-----------|
+| `docs/architektura.md` | Diagram przepływu, reguły detekcji, kontrakty API |
+| `docs/instrukcja_uruchomienia.md` | Szczegółowa instrukcja startu i częste problemy |
+| `docs/api.md` | Pełna lista endpointów i modeli danych |
+| `docs/scenariusz_prezentacji.md` | Scenariusz 10–15 min demo z komendami |

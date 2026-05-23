@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from app.shared_models import Severity, RuleType, Protocol
 
@@ -40,6 +41,8 @@ class RuleResponse(BaseModel):
     enabled: bool
     severity: Severity
     description: str
+    created_at: datetime
+    hit_count: int
 
     match: MatchResponse | None
 

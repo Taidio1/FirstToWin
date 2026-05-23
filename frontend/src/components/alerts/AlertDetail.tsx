@@ -14,10 +14,12 @@ interface Props {
   alert: AlertItem | null;
   onClose: () => void;
   onChangeStatus: (id: number, status: AlertStatus) => void;
+  onAddToBlacklist?: (srcIp: string) => void;
   saving?: boolean;
+  blacklisting?: boolean;
 }
 
-export function AlertDetail({ alert, onClose, onChangeStatus, saving }: Props) {
+export function AlertDetail({ alert, onClose, onChangeStatus, onAddToBlacklist, saving, blacklisting }: Props) {
   const open = !!alert;
   const { data: osint, isLoading: osintLoading } = useQuery({
     queryKey: ['osint', alert?.id],
@@ -130,18 +132,25 @@ export function AlertDetail({ alert, onClose, onChangeStatus, saving }: Props) {
             </div>
           </section>
 
-          <section className="flex items-center justify-between rounded-xl border border-ink-700/70 bg-ink-900/60 p-3 text-xs text-slate-300">
-            <div className="flex items-center gap-2">
-              <Server size={14} className="text-slate-400" />
-              <span>Suggest blocking</span>
-              <code className="rounded bg-ink-800 px-1.5 py-0.5 font-mono text-accent">
-                {alert.src_ip}
-              </code>
-            </div>
-            <Button variant="subtle" size="sm">
-              Add to blacklist <ArrowRight size={13} />
-            </Button>
-          </section>
+          {onAddToBlacklist && (
+            <section className="flex items-center justify-between rounded-xl border border-ink-700/70 bg-ink-900/60 p-3 text-xs text-slate-300">
+              <div className="flex items-center gap-2">
+                <Server size={14} className="text-slate-400" />
+                <span>Suggest blocking</span>
+                <code className="rounded bg-ink-800 px-1.5 py-0.5 font-mono text-accent">
+                  {alert.src_ip}
+                </code>
+              </div>
+              <Button
+                variant="subtle"
+                size="sm"
+                loading={blacklisting}
+                onClick={() => onAddToBlacklist(alert.src_ip)}
+              >
+                Add to blacklist <ArrowRight size={13} />
+              </Button>
+            </section>
+          )}
         </div>
       )}
     </Modal>

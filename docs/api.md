@@ -141,6 +141,7 @@ Niniejszy dokument zawiera listę endpointów API wymaganych przez interfejs uż
   dst_ip: string;
   protocol: Protocol;
   sensor_id: string;
+  details: string;
   created_at: string;
 }
 ```
@@ -171,3 +172,74 @@ Aplikowanie migracji (backend project root):
 ```bash
 alembic upgrade head
 ```
+
+## Aktualne dodatki MVP demo
+
+### Healthcheck
+
+- **Endpoint:** `GET /api/health`
+- **Autoryzacja:** brak
+- **Odpowiedz:**
+  ```json
+  {
+    "status": "ok",
+    "database": "ok",
+    "version": "0.0.1-dev"
+  }
+  ```
+
+### Ingest logow
+
+- **Endpoint:** `POST /api/ingest/logs`
+- **Wymagany nagłówek:** `X-Sensor-Key: <klucz-sensora>`
+- **Body:**
+  ```json
+  {
+    "sensor_name": "string",
+    "src_ip": "string",
+    "dst_ip": "string",
+    "src_port": "number",
+    "dst_port": "number",
+    "protocol": "TCP | UDP | ICMP | OTHER",
+    "flags": "string",
+    "payload_size": "number"
+  }
+  ```
+- **Odpowiedź `201 Created`:** zapisany log i lista alertów utworzonych lub zaktualizowanych dla tego logu.
+- **Odpowiedź `401 Unauthorized`:** brak lub niepoprawny klucz sensora.
+
+---
+
+## 8. Attack Lab (`/attack-lab`)
+
+Dostępny tylko w środowisku demo. Umożliwia wyzwalanie scenariuszy ataku bezpośrednio przez API.
+
+### Status
+
+- **Endpoint:** `GET /attack-lab/status`
+- **Autoryzacja:** Bearer token
+- **Odpowiedź:**
+  ```json
+  {
+    "running": false,
+    "interval_seconds": 30,
+    "seconds_remaining": null,
+    "last_scenario": "port-scan",
+    "last_result": {
+      "scenario": "port-scan",
+      "payloads_sent": 5,
+      "alerts_created": 1
+    }
+  }
+  ```
+
+### Uruchomienie scenariusza
+
+- **Endpoint:** `POST /attack-lab/run`
+- **Body:** `{ "scenario": "port-scan | ssh-bruteforce | blacklist | normal | mixed" }`
+- **Odpowiedź:** `{ "scenario": "string", "payloads_sent": number, "alerts_created": number }`
+
+### Auto-attack
+
+- **Endpoint:** `POST /attack-lab/auto/start` — Body: `{ "interval_seconds": number }`
+- **Endpoint:** `POST /attack-lab/auto/stop`

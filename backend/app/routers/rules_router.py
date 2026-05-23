@@ -1,5 +1,6 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from app.models.rule_model import create_rule_request
+from app.models.rule_model import create_rule_request, RuleResponse
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db.entities import Rule, User, Match
@@ -8,23 +9,16 @@ from app.shared_models import Protocol, Severity, RuleType
 router = APIRouter()
 
 
-@router.get("")
+@router.get("", response_model=List[RuleResponse])
 def get(db: Session = Depends(get_db),
         user: User = Depends(get_current_user)):
-    '''
-    Get all rules
-    '''
     return db.query(Rule).all()
 
 
-@router.post("")
+@router.post("", response_model=RuleResponse)
 def create(req: create_rule_request,
            db: Session = Depends(get_db),
            user: User = Depends(get_current_user)):
-    '''
-    Create a new rule
-    '''
-
     match = Match(
         src_ip=req.match.src_ip,
         dst_ip=req.match.dst_ip,
@@ -44,12 +38,12 @@ def create(req: create_rule_request,
 
     rule.match = match
     db.add(rule)
-    db.flush()
+    db.commit()
     db.refresh(rule)
     return rule
 
 
-@router.put("/{id}")
+@router.put("/{id}", response_model=RuleResponse)
 def update(id: int,
            req: create_rule_request,
            db: Session = Depends(get_db),

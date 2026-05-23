@@ -110,7 +110,7 @@ export default function Rules() {
                       <SeverityBadge severity={r.severity} />
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 font-mono text-xs text-slate-300">
-                      {r.hit_count}
+                      {r.hit_count ?? 0}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5">
                       {r.enabled ? (
@@ -124,7 +124,7 @@ export default function Rules() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 text-xs text-slate-400">
-                      {formatDateTime(r.created_at)}
+                      {r.created_at ? formatDateTime(r.created_at) : '—'}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5">
                       <div className="flex justify-end gap-1">

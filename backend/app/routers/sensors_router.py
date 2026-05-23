@@ -1,3 +1,5 @@
+import secrets
+
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from fastapi import APIRouter, Depends, HTTPException
@@ -30,7 +32,8 @@ def create(
     sensor = Sensor(
         name=req.name,
         location=req.location,
-        status=req.status
+        status=req.status,
+        api_key=secrets.token_hex(32),
     )
 
     db.add(sensor)

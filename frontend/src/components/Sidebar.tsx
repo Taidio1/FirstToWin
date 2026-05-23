@@ -3,6 +3,7 @@ import {
   Activity,
   AlertTriangle,
   Cpu,
+  FlaskConical,
   LayoutDashboard,
   ScrollText,
   ShieldCheck,
@@ -16,6 +17,7 @@ const items = [
   { to: '/rules', label: 'Detection rules', icon: ShieldCheck },
   { to: '/sensors', label: 'Sensors', icon: Cpu },
   { to: '/logs', label: 'Network logs', icon: ScrollText },
+  { to: '/attack-lab', label: 'Attack Lab', icon: FlaskConical },
 ];
 
 export function Sidebar() {

@@ -7,6 +7,7 @@ from app.routers.rules_router import router as rules_router
 from app.routers.sensors_router import router as sensors_router
 from app.routers.ingest_router import router as ingest_router
 from app.routers.health_router import router as health_router
+from app.routers.attack_lab_router import router as attack_lab_router
 api_router = APIRouter()
 
 api_router.include_router(logs_router, prefix="/logs")
@@ -17,3 +18,4 @@ api_router.include_router(rules_router, prefix="/rules")
 api_router.include_router(sensors_router, prefix="/sensors")
 api_router.include_router(ingest_router, prefix="/ingest")
 api_router.include_router(health_router, prefix="/health")
+api_router.include_router(attack_lab_router, prefix="/attack-lab")

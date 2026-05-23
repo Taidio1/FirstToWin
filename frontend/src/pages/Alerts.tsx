@@ -12,6 +12,7 @@ import { SeverityBadge } from '@/components/alerts/SeverityBadge';
 import { StatusBadge } from '@/components/alerts/StatusBadge';
 import { AlertDetail } from '@/components/alerts/AlertDetail';
 import { listAlerts, patchAlertStatus } from '@/services/alerts';
+import { createRule } from '@/services/rules';
 import { extractError } from '@/services/api';
 import { useToast } from '@/contexts/ToastContext';
 import { AlertItem, AlertStatus, Severity } from '@/types';
@@ -62,6 +63,23 @@ export default function Alerts() {
       if (found) setActive(found);
     }
   }, [focusId, data]);
+
+  const blacklistMutation = useMutation({
+    mutationFn: (srcIp: string) =>
+      createRule({
+        name: `Block ${srcIp}`,
+        type: 'blacklist_ip',
+        enabled: true,
+        severity: 'critical',
+        match: { src_ip: srcIp, protocol: 'TCP' },
+        description: `Auto-generated blacklist rule for ${srcIp}.`,
+      }),
+    onSuccess: (rule) => {
+      qc.invalidateQueries({ queryKey: ['rules'] });
+      toast.success('Rule created', `${rule.name} added to blacklist.`);
+    },
+    onError: (err) => toast.error('Could not create rule', extractError(err)),
+  });
 
   const patchMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: AlertStatus }) =>
@@ -226,7 +244,9 @@ export default function Alerts() {
         alert={active}
         onClose={() => setActive(null)}
         onChangeStatus={(id, status) => patchMutation.mutate({ id, status })}
+        onAddToBlacklist={(srcIp) => blacklistMutation.mutate(srcIp)}
         saving={patchMutation.isPending}
+        blacklisting={blacklistMutation.isPending}
       />
     </div>
   );

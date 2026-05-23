@@ -36,7 +36,57 @@ Backend wykonuje `alembic upgrade head` przy starcie kontenera. Dane demo sa two
 | Uzytkownik | `demo@example.local` |
 | Haslo | `demo1234` |
 | Sensor | `local-demo-sensor` |
+| Klucz sensora | `demo-sensor-key` |
 | Reguly | `Port Scan`, `SSH Brute Force`, `Blacklist IP` |
+
+## Tryb live demo
+
+Tryb live uruchamia dodatkowy kontener `ndr-live-simulator`, ktory czeka na backend, wysyla normalny ruch i okresowo generuje jeden z bezpiecznych scenariuszy demo: `port-scan`, `ssh-bruteforce` albo `blacklist`.
+
+Z katalogu glownego repo:
+
+```powershell
+docker compose --profile live up --build
+```
+
+Adresy do sprawdzenia:
+
+| Element | Adres |
+|---------|-------|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| Health | http://localhost:8000/api/health |
+
+Simulator jest przypisany do profilu `live`, wiec zwykle `docker compose up --build` nie uruchamia go automatycznie. Logi symulatora powinny zawierac wpisy podobne do:
+
+```text
+[live-simulator] normal sent=3 alerts=0
+[live-simulator] threat=port-scan sent=5 alerts=1
+```
+
+Dashboard, Alerts i Network logs odswiezaja dane cyklicznie, wiec nowe logi i alerty powinny pojawiac sie bez recznego uruchamiania `simulate_attack.py`.
+
+Zatrzymanie trybu live:
+
+```powershell
+docker compose --profile live down
+```
+
+## Sprawdzenie przed prezentacja
+
+Po uruchomieniu stacka mozna wykonac szybki smoke test:
+
+```powershell
+python scripts/smoke_demo.py
+```
+
+Skrypt sprawdza:
+
+1. `GET /api/health`,
+2. logowanie kontem demo,
+3. aktualny dashboard,
+4. wyslanie scenariusza port scan przez autoryzowany ingest,
+5. wzrost licznika alertow.
 
 ## Start lokalny bez Dockera
 
@@ -87,12 +137,25 @@ Po starcie backendu uruchom z katalogu glownego repo:
 python scripts/simulate_attack.py --type port-scan
 python scripts/simulate_attack.py --type ssh-bruteforce
 python scripts/simulate_attack.py --type blacklist
+python scripts/simulate_attack.py --type full-demo
 ```
 
 Skrypt wysyla logi tylko do lokalnego endpointu:
 
 ```text
 http://localhost:8000/api/ingest/logs
+```
+
+Ingest wymaga naglowka:
+
+```text
+X-Sensor-Key: demo-sensor-key
+```
+
+Symulator dodaje ten naglowek automatycznie. Klucz mozna nadpisac argumentem:
+
+```powershell
+python scripts/simulate_attack.py --type full-demo --sensor-key demo-sensor-key
 ```
 
 Oczekiwany efekt:
