@@ -4,13 +4,17 @@ from fastapi import FastAPI, Request
 from loguru import logger
 import time
 import app.settings as settings
+from app.db.db import SessionLocal
 from app.routers import api_router
+from app.services.demo_seed import ensure_demo_data
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info(
         f"Listening @ {settings.SERVER_HOST}:{settings.SERVER_PORT}")
+    with SessionLocal() as db:
+        ensure_demo_data(db)
     yield
     logger.info("Shutting down...")
 

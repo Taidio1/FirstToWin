@@ -8,6 +8,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { USE_MOCK } from '@/services/api';
 
 const items = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -69,7 +70,9 @@ export function Sidebar() {
           </span>
           Detection engine live
         </div>
-        <div className="mt-1 text-[11px] text-slate-500">v0.1.0 • mock mode</div>
+        <div className="mt-1 text-[11px] text-slate-500">
+          v0.1.0 - {USE_MOCK ? 'mock mode' : 'backend mode'}
+        </div>
       </div>
     </aside>
   );

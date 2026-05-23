@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer, DateTime
 from app.db.db import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Alert(Base):
@@ -16,5 +16,6 @@ class Alert(Base):
     dst_ip: Mapped[str] = mapped_column(String)
     protocol: Mapped[str] = mapped_column(String)
     sensor_id: Mapped[str] = mapped_column(String)
+    details: Mapped[str] = mapped_column(String, nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))

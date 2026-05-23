@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer, DateTime
 from app.db.db import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class User(Base):
@@ -12,5 +12,5 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     role: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False)
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)

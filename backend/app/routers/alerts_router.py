@@ -1,5 +1,6 @@
 from app.models.alert_model import alert_patch_request
 from fastapi import APIRouter, Query, Depends, HTTPException
+from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db.entities.alert import Alert
@@ -32,16 +33,33 @@ def paginated_alerts(
     if status:
         query = query.filter(Alert.status == status)
 
+    if q:
+        query = query.filter(
+            or_(
+                Alert.rule_name.ilike(f"%{q}%"),
+                Alert.details.ilike(f"%{q}%"),
+                Alert.src_ip.ilike(f"%{q}%"),
+                Alert.dst_ip.ilike(f"%{q}%"),
+            )
+        )
+
+    total = query.count()
     offset = (page - 1) * page_size
 
     alerts = (
         query
+        .order_by(Alert.created_at.desc())
         .offset(offset)
         .limit(page_size)
         .all()
     )
 
-    return alerts
+    return {
+        "items": alerts,
+        "total": total,
+        "page": page,
+        "page_size": page_size
+    }
 
 
 @router.get("/{id}")
@@ -100,4 +118,4 @@ def update_alert(
     db.commit()
     db.refresh(alert)
 
-    return
+    return alert
