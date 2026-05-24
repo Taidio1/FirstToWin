@@ -19,3 +19,6 @@ class Alert(Base):
     details: Mapped[str] = mapped_column(String, nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    fingerprint: Mapped[str] = mapped_column(String, nullable=False, default="")
+    count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    last_seen: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
