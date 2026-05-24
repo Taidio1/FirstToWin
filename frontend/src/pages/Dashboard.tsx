@@ -148,6 +148,11 @@ export default function Dashboard() {
             }
           />
           <CardBody className="p-0">
+            {recent.data?.items.length === 0 && (
+              <div className="flex h-32 items-center justify-center text-sm text-slate-500">
+                No recent alerts. Run a simulation to populate this list.
+              </div>
+            )}
             <ul className="divide-y divide-ink-800/70">
               {recent.data?.items.map((a) => (
                 <li

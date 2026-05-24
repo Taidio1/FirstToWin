@@ -8,6 +8,14 @@ export function AlertsOverTime({ data }: { data: DashboardStats['alerts_timeline
     count: d.count,
   }));
 
+  if (data.every((d) => d.count === 0)) {
+    return (
+      <div className="flex h-[220px] items-center justify-center text-sm text-slate-500">
+        No alert data yet — run a simulation to see activity.
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={220}>
       <AreaChart data={formatted} margin={{ left: -16, right: 12, top: 8, bottom: 0 }}>

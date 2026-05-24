@@ -14,6 +14,14 @@ export function TopSourcesBar({
 }: {
   data: { ip: string; count: number; severity: Severity }[];
 }) {
+  if (data.length === 0) {
+    return (
+      <div className="flex h-[180px] items-center justify-center text-sm text-slate-500">
+        No top sources yet.
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={Math.max(180, data.length * 32)}>
       <BarChart data={data} layout="vertical" margin={{ left: 16, right: 24, top: 4, bottom: 4 }}>
