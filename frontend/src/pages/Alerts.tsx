@@ -201,8 +201,22 @@ export default function Alerts() {
                     <span className="text-slate-200">{a.dst_ip}</span>
                     <span className="ml-2 text-slate-500">{a.protocol}</span>
                   </td>
-                  <td className="whitespace-nowrap px-5 py-3.5">
-                    <StatusBadge status={a.status} />
+                  <td
+                    className="whitespace-nowrap px-5 py-3.5"
+                    title="Click to advance status"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const next: Record<string, AlertStatus> = {
+                        open: 'acknowledged',
+                        acknowledged: 'resolved',
+                        resolved: 'open',
+                      };
+                      patchMutation.mutate({ id: a.id, status: next[a.status] as AlertStatus });
+                    }}
+                  >
+                    <span className="cursor-pointer rounded hover:opacity-75 transition-opacity">
+                      <StatusBadge status={a.status} />
+                    </span>
                   </td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-xs text-slate-400">
                     {timeAgo(a.created_at)}
