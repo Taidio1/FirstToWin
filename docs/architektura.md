@@ -96,6 +96,30 @@ Skrypt uzywa tylko lokalnego backendu `http://localhost:8000/api/ingest/logs`. N
 
 Katalogi `zeek/` i `suricata/` sa obecnie zrodlem konfiguracji sensorow i nie sa mergowane jako pelne galezie. Integracja z realnym ruchem Zeek/Suricata moze zostac podlaczona pozniej przez ten sam przeplyw: parser logow -> `POST /api/ingest/logs` -> detekcja -> alerty.
 
+## Znane ograniczenia (MVP)
+
+| Obszar | Ograniczenie |
+|--------|-------------|
+| Sensor | Symulator HTTP — nie prawdziwy tap sieciowy (PCAP, Zeek, Suricata); ruch generowany syntetycznie |
+| OSINT | Endpoint `/api/alerts/{id}/osint` zwraca stub — dane nie sa pobierane z AbuseIPDB w czasie rzeczywistym |
+| Deduplication | Fingerprint SHA-1 oparty o `rule_id + src_ip + dst_ip + protocol`; brak obslugi alertow korelacyjnych laczacych wiele regul |
+| Autoryzacja | JWT bez refresh tokena — sesja wygasa po uplywie TTL, wymagane ponowne logowanie |
+| Skalowanie | Ingest synchroniczny (brak kolejki Celery/RabbitMQ); przy duzym wolumenie logów moze byc waskím gardlem |
+| Frontend | Polling co 5s zamiast WebSocket — widoczne opoznienie przy szybkim naplywnie alertow |
+| Baza danych | Brak row-level security; jeden schemat dla wszystkich uzytkownikow |
+
+## Co dalej (planowane rozszerzenia)
+
+- **Prawdziwy sensor** — integracja Zeek lub Suricata przez `backend/app/services/normalizer.py`; parser `eve.json`/`conn.log` → ingest API; przykladowe logi w `data/demo_logs/`
+- **WebSocket / SSE** — zamiana pollingu na push dla natychmiastowych powiadomien o alertach
+- **OSINT live** — podlaczenie klucza AbuseIPDB + VirusTotal + OTX; cache wynikow w Redis
+- **ML anomaly detection** — Isolation Forest lub LSTM trenowany na ruchu baseline (Oskar)
+- **Refresh token** — bezpieczniejsza sesja JWT z automatycznym odswiezaniem
+- **Kolejkowanie** — Celery + Redis/RabbitMQ dla asynchronicznego procesowania logów pod duzym ruchem
+- **SIEM export** — wyslanie alertow do Elastic, Splunk lub przez syslog
+- **Multi-tenant / RBAC** — izolacja danych per-organizacja, pelne role viewer / analyst / admin
+- **Deployment cloud** — Kubernetes + Helm lub Docker Swarm dla srodowisk wielosenzorowych
+
 ## Mozliwe rozszerzenia
 
 | Obszar | Opis |
