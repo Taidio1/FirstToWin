@@ -1,3 +1,4 @@
+import hashlib
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import distinct, func, select
@@ -5,6 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.db.entities import Alert, NetworkLog, Rule
 from app.shared_models import AlertStatus, RuleType
+
+
+def _make_fingerprint(rule_id: int, src_ip: str, dst_ip: str, protocol: str) -> str:
+    raw = f"{rule_id}|{src_ip}|{dst_ip}|{protocol}"
+    return hashlib.sha1(raw.encode()).hexdigest()
 
 
 def detect_alerts(db: Session, log: NetworkLog, sensor_name: str) -> list[Alert]:
@@ -41,11 +47,12 @@ def detect_alerts(db: Session, log: NetworkLog, sensor_name: str) -> list[Alert]
             )
 
     for index, alert in enumerate(alerts):
-        existing_alert = _find_open_duplicate(db, alert)
+        existing_alert = _find_open_duplicate(db, alert.fingerprint)
         if existing_alert is None:
             db.add(alert)
         else:
-            existing_alert.details = _deduplicated_details(existing_alert.details)
+            existing_alert.count += 1
+            existing_alert.last_seen = datetime.now(timezone.utc)
             alerts[index] = existing_alert
 
     return alerts
@@ -96,6 +103,12 @@ def _is_blacklisted(rule: Rule, log: NetworkLog) -> bool:
 
 
 def _build_alert(rule: Rule, log: NetworkLog, sensor_name: str, details: str) -> Alert:
+    fingerprint = _make_fingerprint(
+        rule_id=rule.id,
+        src_ip=log.src_ip,
+        dst_ip=log.dst_ip,
+        protocol=str(log.protocol.value if hasattr(log.protocol, "value") else log.protocol),
+    )
     return Alert(
         rule_id=rule.id,
         rule_name=rule.name,
@@ -106,23 +119,16 @@ def _build_alert(rule: Rule, log: NetworkLog, sensor_name: str, details: str) ->
         protocol=str(log.protocol.value if hasattr(log.protocol, "value") else log.protocol),
         sensor_id=sensor_name,
         details=details,
+        fingerprint=fingerprint,
+        count=1,
+        last_seen=None,
     )
 
 
-def _find_open_duplicate(db: Session, alert: Alert) -> Alert | None:
+def _find_open_duplicate(db: Session, fingerprint: str) -> Alert | None:
     return db.scalars(
         select(Alert).where(
-            Alert.rule_id == alert.rule_id,
-            Alert.rule_name == alert.rule_name,
+            Alert.fingerprint == fingerprint,
             Alert.status == AlertStatus.open.value,
-            Alert.src_ip == alert.src_ip,
-            Alert.dst_ip == alert.dst_ip,
-            Alert.protocol == alert.protocol,
         )
     ).first()
-
-
-def _deduplicated_details(details: str) -> str:
-    base_details = details.split(" Last seen:")[0]
-    last_seen = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    return f"{base_details} Last seen: {last_seen}."
