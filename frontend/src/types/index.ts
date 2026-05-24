@@ -88,6 +88,8 @@ export interface AlertItem {
   details: string;
   created_at: string;
   sensor_id: string;
+  count: number;
+  last_seen: string | null;
   osint?: OsintReport | null;
 }
 

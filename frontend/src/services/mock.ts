@@ -167,6 +167,8 @@ function randomAlert(): AlertItem {
         : `Threshold exceeded for rule "${rule.name}" — see details`,
     created_at: new Date(Date.now() - Math.floor(Math.random() * 24 * 3600_000)).toISOString(),
     sensor_id: `sensor-${Math.ceil(Math.random() * 4).toString().padStart(2, '0')}`,
+    count: Math.floor(Math.random() * 5) + 1,
+    last_seen: Math.random() < 0.5 ? new Date(Date.now() - Math.floor(Math.random() * 3600_000)).toISOString() : null,
     osint:
       Math.random() < 0.4
         ? {

@@ -82,6 +82,12 @@ export function AlertDetail({ alert, onClose, onChangeStatus, onAddToBlacklist, 
             <Field label="Destination IP" value={alert.dst_ip} mono />
             <Field label="Sensor" value={alert.sensor_id} mono />
             <Field label="Triggered at" value={formatDateTime(alert.created_at)} mono />
+            <Field label="Occurrences" value={String(alert.count)} mono />
+            <Field
+              label="Last seen"
+              value={alert.last_seen ? formatDateTime(alert.last_seen) : 'First occurrence'}
+              mono
+            />
           </section>
 
           <section>
