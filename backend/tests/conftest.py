@@ -83,7 +83,7 @@ def auth_client(db_engine):
             id=1,
             email="demo@example.local",
             username="demo",
-            role="analyst",
+            role="admin",
             password="unused",
         )
 

@@ -31,7 +31,7 @@ export default function Register() {
         <div>
           <h2 className="text-xl font-semibold text-slate-100">Request access</h2>
           <p className="mt-1 text-sm text-slate-400">
-            New analysts get a default <span className="text-slate-200">viewer</span> role.
+            New accounts get a default <span className="text-slate-200">user</span> role.
           </p>
         </div>
 

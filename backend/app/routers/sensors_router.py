@@ -3,7 +3,7 @@ import secrets
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from app.middleware.auth import get_current_user
+from app.middleware.auth import get_current_user, require_admin
 from app.db.entities import Sensor, User
 from app.models.sensor_model import create_sensor_request
 router = APIRouter()
@@ -24,7 +24,7 @@ def get(
 def create(
         req: create_sensor_request,
         db: Session = Depends(get_db),
-        user: User = Depends(get_current_user),
+        user: User = Depends(require_admin),
 ):
     '''
     Creates a sensor
@@ -47,7 +47,7 @@ def create(
 def delete(
         id: int,
         db: Session = Depends(get_db),
-        user: User = Depends(get_current_user)
+        user: User = Depends(require_admin)
 ):
     '''
     Delete a sensor by id

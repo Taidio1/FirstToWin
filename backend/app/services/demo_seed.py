@@ -34,10 +34,12 @@ def ensure_demo_data(db: Session) -> Sensor:
             User(
                 email="demo@example.local",
                 username="demo",
-                role="analyst",
+                role="admin",
                 password=hash_password("demo1234"),
             )
         )
+    elif user.role not in ("admin", "user"):
+        user.role = "admin"
 
     _ensure_rule(
         db,

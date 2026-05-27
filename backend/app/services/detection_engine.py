@@ -52,7 +52,10 @@ def detect_alerts(db: Session, log: NetworkLog, sensor_name: str) -> list[Alert]
             db.add(alert)
         else:
             existing_alert.count += 1
-            existing_alert.last_seen = datetime.now(timezone.utc)
+            last_seen = datetime.now(timezone.utc)
+            existing_alert.last_seen = last_seen
+            base_details = existing_alert.details.split(" Last seen:", 1)[0]
+            existing_alert.details = f"{base_details} Last seen: {last_seen.isoformat()}"
             alerts[index] = existing_alert
 
     return alerts

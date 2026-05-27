@@ -49,7 +49,7 @@ export function Topbar() {
                 {user?.username ?? 'guest'}
               </div>
               <div className="text-[10px] uppercase tracking-wide text-slate-500">
-                {user?.role ?? 'viewer'}
+                {user?.role ?? 'user'}
               </div>
             </div>
           </button>

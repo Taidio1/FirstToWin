@@ -4,7 +4,7 @@ from app.models.rule_model import create_rule_request, RuleResponse
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db.entities import Rule, User, Match
-from app.middleware.auth import get_current_user
+from app.middleware.auth import get_current_user, require_admin
 from app.shared_models import Protocol, Severity, RuleType
 router = APIRouter()
 
@@ -18,7 +18,7 @@ def get(db: Session = Depends(get_db),
 @router.post("", response_model=RuleResponse)
 def create(req: create_rule_request,
            db: Session = Depends(get_db),
-           user: User = Depends(get_current_user)):
+           user: User = Depends(require_admin)):
     match = Match(
         src_ip=req.match.src_ip,
         dst_ip=req.match.dst_ip,
@@ -47,7 +47,7 @@ def create(req: create_rule_request,
 def update(id: int,
            req: create_rule_request,
            db: Session = Depends(get_db),
-           user: User = Depends(get_current_user)):
+           user: User = Depends(require_admin)):
     '''
     Update an existing rule
     '''
@@ -77,7 +77,7 @@ def update(id: int,
 @router.delete("/{id}")
 def delete(id: int,
            db: Session = Depends(get_db),
-           user: User = Depends(get_current_user)):
+           user: User = Depends(require_admin)):
     '''
     Delete a rule
     '''
