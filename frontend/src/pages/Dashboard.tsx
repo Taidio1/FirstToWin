@@ -11,6 +11,7 @@ import {
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatCard } from '@/components/charts/StatCard';
+import { AnimatedNumber } from '@/components/charts/AnimatedNumber';
 import { AlertsOverTime } from '@/components/charts/AlertsOverTime';
 import { SeverityPie } from '@/components/charts/SeverityPie';
 import { TopSourcesBar } from '@/components/charts/TopSourcesBar';
@@ -20,13 +21,12 @@ import { fetchDashboardStats } from '@/services/dashboard';
 import { listAlerts } from '@/services/alerts';
 import { timeAgo } from '@/lib/utils';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
-
-function formatNumber(n: number) {
-  return new Intl.NumberFormat('en-US').format(n);
-}
+import { useLiveAlertPulse, useLiveConnectionState } from '@/hooks/useRealtimeAlerts';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const freshAlertId = useLiveAlertPulse();
+  const liveState = useLiveConnectionState();
   const stats = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: fetchDashboardStats,
@@ -49,8 +49,17 @@ export default function Dashboard() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-500">
-            <Radio size={12} className="text-emerald-400 animate-pulse" />
-            Live · last 24h
+            <Radio
+              size={12}
+              className={
+                liveState === 'connected'
+                  ? 'text-emerald-400 animate-pulse'
+                  : liveState === 'connecting'
+                    ? 'text-amber-300 animate-pulse'
+                    : 'text-slate-500'
+              }
+            />
+            Live WebSocket · last 24h
           </div>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-50">
             Network detection overview
@@ -67,28 +76,38 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Open critical alerts"
-          value={formatNumber(s.alerts_critical_open)}
+          value={<AnimatedNumber value={s.alerts_critical_open} />}
           icon={<ShieldAlert size={18} />}
           tone="danger"
-          hint={`${s.alerts_open} open total`}
+          hint={
+            <>
+              <AnimatedNumber value={s.alerts_open} /> open total
+            </>
+          }
+          pulse={!!freshAlertId}
         />
         <StatCard
           label="Alerts (24h)"
-          value={formatNumber(s.alerts_24h)}
+          value={<AnimatedNumber value={s.alerts_24h} />}
           icon={<AlertTriangle size={18} />}
           hint="Across all sensors"
           trend={{ direction: 'up', value: '+12% vs. yesterday' }}
+          pulse={!!freshAlertId}
         />
         <StatCard
           label="Sensors online"
-          value={`${s.sensors_online} / ${s.sensors_total}`}
+          value={
+            <>
+              <AnimatedNumber value={s.sensors_online} /> / <AnimatedNumber value={s.sensors_total} />
+            </>
+          }
           icon={<Cpu size={18} />}
           tone={s.sensors_online === s.sensors_total ? 'success' : 'accent'}
           hint={s.sensors_online < s.sensors_total ? 'Check sensor health' : 'All systems nominal'}
         />
         <StatCard
           label="Packets analyzed"
-          value={formatNumber(s.packets_24h)}
+          value={<AnimatedNumber value={s.packets_24h} />}
           icon={<Network size={18} />}
           tone="accent"
           hint="ingested in the last 24h"
@@ -96,7 +115,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
+        <Card className={`xl:col-span-2 ${freshAlertId ? 'chart-live-pulse' : ''}`}>
           <CardHeader
             title="Alerts over time"
             description="Hourly volume across all severities"
@@ -121,7 +140,7 @@ export default function Dashboard() {
           </CardBody>
         </Card>
 
-        <Card>
+        <Card className={freshAlertId ? 'chart-live-pulse' : ''}>
           <CardHeader title="By severity" description="Distribution in the last 24h" />
           <CardBody>
             <SeverityPie data={s.by_severity} />
@@ -130,7 +149,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Card>
+        <Card className={freshAlertId ? 'chart-live-pulse' : ''}>
           <CardHeader title="Top noisy sources" description="By alert count" />
           <CardBody>
             <TopSourcesBar data={s.top_sources} />
@@ -157,7 +176,10 @@ export default function Dashboard() {
               {recent.data?.items.map((a) => (
                 <li
                   key={a.id}
-                  className="group flex cursor-pointer items-center justify-between gap-3 px-5 py-3 transition-colors hover:bg-ink-800/40"
+                  className={
+                    'group flex cursor-pointer items-center justify-between gap-3 px-5 py-3 transition-colors hover:bg-ink-800/40 ' +
+                    (freshAlertId === a.id ? 'live-row-pulse' : '')
+                  }
                   onClick={() => navigate(`/alerts?focus=${a.id}`)}
                 >
                   <div className="flex items-center gap-3 min-w-0">

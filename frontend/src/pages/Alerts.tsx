@@ -18,6 +18,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { AlertItem, AlertStatus, Severity } from '@/types';
 import { timeAgo } from '@/lib/utils';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { useLiveAlertPulse } from '@/hooks/useRealtimeAlerts';
 
 const PAGE_SIZE = 20;
 
@@ -32,6 +33,7 @@ export default function Alerts() {
     (params.get('status') as AlertStatus) || ''
   );
   const [active, setActive] = useState<AlertItem | null>(null);
+  const freshAlertId = useLiveAlertPulse();
 
   const focusId = params.get('focus');
   const qc = useQueryClient();
@@ -185,7 +187,10 @@ export default function Alerts() {
               {data?.items.map((a) => (
                 <tr
                   key={a.id}
-                  className="cursor-pointer transition-colors hover:bg-ink-800/40"
+                  className={
+                    'cursor-pointer transition-colors hover:bg-ink-800/40 ' +
+                    (freshAlertId === a.id ? 'live-row-pulse' : '')
+                  }
                   onClick={() => setActive(a)}
                 >
                   <td className="whitespace-nowrap px-5 py-3.5">

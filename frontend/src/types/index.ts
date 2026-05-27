@@ -93,6 +93,13 @@ export interface AlertItem {
   osint?: OsintReport | null;
 }
 
+export type LiveAlertEventType = 'alert.created' | 'alert.updated';
+
+export interface LiveAlertEvent {
+  type: LiveAlertEventType;
+  alert: AlertItem;
+}
+
 export interface DashboardStats {
   alerts_24h: number;
   alerts_open: number;

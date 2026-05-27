@@ -44,7 +44,13 @@ export function TopSourcesBar({
             fontSize: 12,
           }}
         />
-        <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={14}>
+        <Bar
+          dataKey="count"
+          radius={[0, 6, 6, 0]}
+          barSize={14}
+          isAnimationActive
+          animationDuration={500}
+        >
           {data.map((d) => (
             <Cell key={d.ip} fill={COLORS[d.severity]} />
           ))}

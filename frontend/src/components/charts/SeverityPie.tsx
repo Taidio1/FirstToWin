@@ -33,6 +33,8 @@ export function SeverityPie({ data }: { data: { severity: Severity; count: numbe
             outerRadius={68}
             paddingAngle={2}
             stroke="none"
+            isAnimationActive
+            animationDuration={500}
           >
             {filtered.map((entry) => (
               <Cell key={entry.severity} fill={COLORS[entry.severity]} />

@@ -1,12 +1,23 @@
 from app.models.alert_model import alert_patch_request
-from fastapi import APIRouter, Query, Depends, HTTPException
+from fastapi import APIRouter, Query, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db.entities.alert import Alert
 from app.middleware.auth import get_current_user
+from app.services.realtime_alerts import alert_broadcaster
 from app.shared_models import AlertStatus, Severity
 router = APIRouter()
+
+
+@router.websocket("/ws")
+async def alert_websocket(websocket: WebSocket):
+    await alert_broadcaster.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        alert_broadcaster.disconnect(websocket)
 
 
 @router.get("")

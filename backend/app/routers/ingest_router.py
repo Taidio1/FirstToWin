@@ -9,12 +9,13 @@ from app.db.entities import NetworkLog, Sensor
 from app.models.ingest_model import ingest_log_request
 from app.services.demo_seed import ensure_demo_data
 from app.services.detection_engine import detect_alerts
+from app.services.realtime_alerts import alert_broadcaster
 
 router = APIRouter()
 
 
 @router.post("/logs", status_code=status.HTTP_201_CREATED)
-def ingest_log(
+async def ingest_log(
     req: ingest_log_request,
     db: Session = Depends(get_db),
     x_sensor_key: str | None = Header(default=None, alias="X-Sensor-Key"),
@@ -48,5 +49,7 @@ def ingest_log(
     db.refresh(log)
     for alert in alerts:
         db.refresh(alert)
+    for alert in alerts:
+        await alert_broadcaster.publish_alert(alert)
 
     return {"log": log, "alerts": alerts}

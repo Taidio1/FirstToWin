@@ -51,6 +51,8 @@ export function AlertsOverTime({ data }: { data: DashboardStats['alerts_timeline
           stroke="#5b9dff"
           strokeWidth={2}
           fill="url(#alertGrad)"
+          isAnimationActive
+          animationDuration={500}
         />
       </AreaChart>
     </ResponsiveContainer>

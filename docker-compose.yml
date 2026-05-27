@@ -2,6 +2,8 @@ services:
   postgres:
     image: postgres:17-alpine
     container_name: ndr-postgres
+    profiles:
+      - local-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: haslo
@@ -22,16 +24,20 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: ndr-backend
+    env_file:
+      - ./backend/.env
     environment:
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8000
-      DB_URL: postgresql+psycopg://postgres:haslo@postgres:5432/ndr
       DEBUG: "true"
     ports:
       - "8000:8000"
-    depends_on:
-      postgres:
-        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     restart: unless-stopped
 
   frontend:
@@ -45,7 +51,8 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   simulator:
@@ -63,7 +70,7 @@ services:
       LIVE_THREAT_TYPES: port-scan,ssh-bruteforce,blacklist
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     profiles:
       - live
     restart: unless-stopped
