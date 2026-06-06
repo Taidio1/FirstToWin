@@ -8,6 +8,7 @@ interface Props {
   icon?: ReactNode;
   tone?: 'default' | 'danger' | 'success' | 'accent';
   trend?: { direction: 'up' | 'down'; value: string };
+  pulse?: boolean;
 }
 
 const toneClasses = {
@@ -17,9 +18,9 @@ const toneClasses = {
   accent: 'text-accent',
 };
 
-export function StatCard({ label, value, hint, icon, tone = 'default', trend }: Props) {
+export function StatCard({ label, value, hint, icon, tone = 'default', trend, pulse }: Props) {
   return (
-    <div className="panel-elevated relative overflow-hidden p-5">
+    <div className={cn('panel-elevated relative overflow-hidden p-5', pulse && 'chart-live-pulse')}>
       <div className="flex items-start justify-between">
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400">

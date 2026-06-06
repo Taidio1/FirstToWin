@@ -1,11 +1,23 @@
 from app.models.alert_model import alert_patch_request
-from fastapi import APIRouter, Query, Depends, HTTPException
+from fastapi import APIRouter, Query, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 from app.db.db import get_db
 from app.db.entities.alert import Alert
 from app.middleware.auth import get_current_user
+from app.services.realtime_alerts import alert_broadcaster
 from app.shared_models import AlertStatus, Severity
 router = APIRouter()
+
+
+@router.websocket("/ws")
+async def alert_websocket(websocket: WebSocket):
+    await alert_broadcaster.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        alert_broadcaster.disconnect(websocket)
 
 
 @router.get("")
@@ -32,16 +44,33 @@ def paginated_alerts(
     if status:
         query = query.filter(Alert.status == status)
 
+    if q:
+        query = query.filter(
+            or_(
+                Alert.rule_name.ilike(f"%{q}%"),
+                Alert.details.ilike(f"%{q}%"),
+                Alert.src_ip.ilike(f"%{q}%"),
+                Alert.dst_ip.ilike(f"%{q}%"),
+            )
+        )
+
+    total = query.count()
     offset = (page - 1) * page_size
 
     alerts = (
         query
+        .order_by(Alert.created_at.desc())
         .offset(offset)
         .limit(page_size)
         .all()
     )
 
-    return alerts
+    return {
+        "items": alerts,
+        "total": total,
+        "page": page,
+        "page_size": page_size
+    }
 
 
 @router.get("/{id}")
@@ -100,4 +129,4 @@ def update_alert(
     db.commit()
     db.refresh(alert)
 
-    return
+    return alert

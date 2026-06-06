@@ -12,6 +12,15 @@ const COLORS: Record<Severity, string> = {
 export function SeverityPie({ data }: { data: { severity: Severity; count: number }[] }) {
   const filtered = data.filter((d) => d.count > 0);
   const total = filtered.reduce((s, d) => s + d.count, 0) || 1;
+
+  if (filtered.length === 0) {
+    return (
+      <div className="flex h-[150px] items-center justify-center text-sm text-slate-500">
+        No alerts to display.
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-5">
       <ResponsiveContainer width={150} height={150}>
@@ -24,6 +33,8 @@ export function SeverityPie({ data }: { data: { severity: Severity; count: numbe
             outerRadius={68}
             paddingAngle={2}
             stroke="none"
+            isAnimationActive
+            animationDuration={500}
           >
             {filtered.map((entry) => (
               <Cell key={entry.severity} fill={COLORS[entry.severity]} />

@@ -1,11 +1,119 @@
 services:
-  api:
-    build: 
-      context: ./api
-      dockerfile: Dockerfile
-    container_name: ndr-api
+  postgres:
+    image: postgres:17-alpine
+    container_name: ndr-postgres
+    profiles:
+      - local-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: haslo
+      POSTGRES_DB: ndr
     ports:
-      - "8080:8080"
-    env_file:
-      - ./api/.env
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ndr"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ndr-backend
+    env_file:
+      - ./backend/.env
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8000
+      DEBUG: "true"
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_USE_MOCK: "false"
+        VITE_API_BASE_URL: /api
+    container_name: ndr-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  simulator-port-scan:
+    image: python:3.12-slim
+    container_name: ndr-sim-port-scan
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts:ro
+    command: python scripts/live_simulator.py
+    environment:
+      LIVE_BACKEND_URL: http://backend:8000
+      LIVE_SENSOR_KEY: demo-sensor-key
+      LIVE_NORMAL_INTERVAL_SECONDS: 10
+      LIVE_THREAT_INTERVAL_SECONDS: 30
+      LIVE_THREAT_TYPES: port-scan
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles:
+      - live
+    restart: unless-stopped
+
+  simulator-ssh-bruteforce:
+    image: python:3.12-slim
+    container_name: ndr-sim-ssh-bruteforce
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts:ro
+    command: python scripts/live_simulator.py
+    environment:
+      LIVE_BACKEND_URL: http://backend:8000
+      LIVE_SENSOR_KEY: demo-sensor-key
+      LIVE_NORMAL_INTERVAL_SECONDS: 10
+      LIVE_THREAT_INTERVAL_SECONDS: 45
+      LIVE_THREAT_TYPES: ssh-bruteforce
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles:
+      - live
+    restart: unless-stopped
+
+  simulator-blacklist:
+    image: python:3.12-slim
+    container_name: ndr-sim-blacklist
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts:ro
+    command: python scripts/live_simulator.py
+    environment:
+      LIVE_BACKEND_URL: http://backend:8000
+      LIVE_SENSOR_KEY: demo-sensor-key
+      LIVE_NORMAL_INTERVAL_SECONDS: 10
+      LIVE_THREAT_INTERVAL_SECONDS: 60
+      LIVE_THREAT_TYPES: blacklist
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles:
+      - live
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

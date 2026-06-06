@@ -19,7 +19,7 @@ export async function register(email: string, username: string, password: string
       id: 2,
       email,
       username,
-      role: 'analyst',
+      role: 'user',
       created_at: new Date().toISOString(),
     };
   }

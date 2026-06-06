@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer, DateTime, Enum
 from app.db.db import Base
-from datetime import datetime
+from datetime import datetime, timezone
 from app.shared_models import Protocol
 
 
@@ -13,7 +13,7 @@ class NetworkLog(Base):
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
-        default=datetime.utcnow
+        default=lambda: datetime.now(timezone.utc)
     )
     src_ip: Mapped[str] = mapped_column(String)
     dst_ip: Mapped[str] = mapped_column(String)

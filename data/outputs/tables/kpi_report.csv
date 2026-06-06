@@ -1,0 +1,12 @@
+﻿metric,value
+Liczba logów sieciowych,5000
+Liczba alertów,36
+Liczba reguł detekcji,3
+Liczba sensorów,3
+Liczba scenariuszy,37
+Unikalne src_ip w logach,16
+Unikalne src_ip w alertach,8
+Początek zakresu logów,2026-05-20 08:03:23
+Koniec zakresu logów,2026-05-27 07:54:23
+Początek zakresu alertów,2026-05-20 09:11:35
+Koniec zakresu alertów,2026-05-27 03:28:11

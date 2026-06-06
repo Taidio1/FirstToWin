@@ -1,0 +1,4 @@
+id,name,type,enabled,severity,description,created_at,hit_count,src_ip,dst_ip,dst_port,protocol,threshold,window_seconds
+1,Port Scan,port_scan,true,high,Detects one source probing many destination ports.,2026-05-19T08:00:00Z,50,,,,TCP,5,60
+2,SSH Brute Force,connection_threshold,true,critical,Detects repeated SSH connection attempts from one source.,2026-05-19T08:00:00Z,39,,,22,TCP,5,60
+3,Blacklist IP,blacklist_ip,true,critical,Detects traffic involving a known blacklisted demo IP.,2026-05-19T08:00:00Z,12,203.0.113.66;198.51.100.23,,,TCP,,

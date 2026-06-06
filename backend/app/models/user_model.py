@@ -8,6 +8,6 @@ class User:
     id: int
     email: str
     username: str
-    role: Literal["admin", "analyst", "viewer"]
+    role: Literal["admin", "user"]
     created_at: datetime
-    password: str
+    password: str | None

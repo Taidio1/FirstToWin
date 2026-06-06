@@ -10,5 +10,6 @@ class Sensor(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String)
     location: Mapped[str] = mapped_column(String)
+    api_key: Mapped[str] = mapped_column(String, nullable=False, default="")
     status: Mapped[SensorStatus] = mapped_column(
         Enum(SensorStatus), nullable=False)

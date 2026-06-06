@@ -33,6 +33,18 @@ def parse_str(name: str) -> str:
     return env_value
 
 
+def parse_optional_bool(name: str, default: bool = False) -> bool:
+    if (env_value := os.getenv(name)) is None:
+        return default
+
+    return env_value.lower() in ("true", "1", "t", "yes", "y")
+
+
+def parse_optional_str(name: str) -> str | None:
+    value = os.getenv(name)
+    return value if value else None
+
+
 # Server settings
 SERVER_HOST = parse_str("SERVER_HOST")
 SERVER_PORT = parse_int("SERVER_PORT")
@@ -43,3 +55,8 @@ DB_URL = parse_str("DB_URL")
 
 # Development settings
 DEBUG = parse_bool("DEBUG")
+
+# Supabase Auth settings
+SUPABASE_URL = parse_optional_str("SUPABASE_URL")
+SUPABASE_ANON_KEY = parse_optional_str("SUPABASE_ANON_KEY")
+SUPABASE_AUTH_ENABLED = parse_optional_bool("SUPABASE_AUTH_ENABLED", default=True)

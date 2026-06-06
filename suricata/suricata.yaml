@@ -1,0 +1,28 @@
+ vars:
+    address-groups:
+      HOME_NET: "[192.168.56.0/24]"
+      EXTERNAL_NET: "!$HOME_NET"
+
+    port-groups:
+      HTTP_PORTS: "80"
+      SHELLCODE_PORTS: "!80"
+
+  default-log-dir: /var/log/suricata/
+
+  outputs:
+    - eve-log:
+        enabled: yes
+        filetype: regular
+        filename: eve.json
+        types:
+          - alert
+          - flow
+          - dns
+          - ssh
+
+  af-packet:
+    - interface: vboxnet0
+
+  rule-files:
+    - /etc/suricata/rules/local.rules
+    - /var/lib/suricata/rules/suricata.rules

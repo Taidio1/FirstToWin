@@ -2,19 +2,24 @@ import { NavLink } from 'react-router-dom';
 import {
   Activity,
   AlertTriangle,
+  BarChart3,
   Cpu,
+  FlaskConical,
   LayoutDashboard,
   ScrollText,
   ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { USE_MOCK } from '@/services/api';
 
 const items = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/alerts', label: 'Alerts', icon: AlertTriangle },
-  { to: '/rules', label: 'Detection rules', icon: ShieldCheck },
-  { to: '/sensors', label: 'Sensors', icon: Cpu },
-  { to: '/logs', label: 'Network logs', icon: ScrollText },
+  { to: '/', label: 'Pulpit', icon: LayoutDashboard, end: true },
+  { to: '/alerts', label: 'Alerty', icon: AlertTriangle },
+  { to: '/rules', label: 'Reguły detekcji', icon: ShieldCheck },
+  { to: '/sensors', label: 'Sensory', icon: Cpu },
+  { to: '/logs', label: 'Logi sieciowe', icon: ScrollText },
+  { to: '/reports', label: 'Analityka', icon: BarChart3 },
+  { to: '/attack-lab', label: 'Laboratorium ataków', icon: FlaskConical },
 ];
 
 export function Sidebar() {
@@ -67,9 +72,11 @@ export function Sidebar() {
             <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-emerald-500" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
           </span>
-          Detection engine live
+          Silnik detekcji aktywny
         </div>
-        <div className="mt-1 text-[11px] text-slate-500">v0.1.0 • mock mode</div>
+        <div className="mt-1 text-[11px] text-slate-500">
+          v0.1.0 - {USE_MOCK ? 'tryb mock' : 'tryb backend'}
+        </div>
       </div>
     </aside>
   );

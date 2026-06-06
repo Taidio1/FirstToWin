@@ -1,0 +1,5 @@
+﻿scenario,logs_count,src_ip_count,dst_ip_count,dst_port_count,avg_payload_size,alerts_count
+port-scan,98,3,5,12,64.0,12
+ssh-bruteforce,87,3,5,1,64.0,12
+blacklist,12,2,5,3,512.0,12
+normal,4803,8,5,9,934.6506350197793,0

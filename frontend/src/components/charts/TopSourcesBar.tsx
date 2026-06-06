@@ -14,6 +14,14 @@ export function TopSourcesBar({
 }: {
   data: { ip: string; count: number; severity: Severity }[];
 }) {
+  if (data.length === 0) {
+    return (
+      <div className="flex h-[180px] items-center justify-center text-sm text-slate-500">
+        No top sources yet.
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={Math.max(180, data.length * 32)}>
       <BarChart data={data} layout="vertical" margin={{ left: 16, right: 24, top: 4, bottom: 4 }}>
@@ -36,7 +44,13 @@ export function TopSourcesBar({
             fontSize: 12,
           }}
         />
-        <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={14}>
+        <Bar
+          dataKey="count"
+          radius={[0, 6, 6, 0]}
+          barSize={14}
+          isAnimationActive
+          animationDuration={500}
+        >
           {data.map((d) => (
             <Cell key={d.ip} fill={COLORS[d.severity]} />
           ))}

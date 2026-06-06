@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Spinner } from '@/components/ui/Spinner';
 import { listLogs } from '@/services/logs';
 import { formatDateTime } from '@/lib/utils';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 const PAGE_SIZE = 50;
 
@@ -20,6 +21,10 @@ export default function Logs() {
     queryKey: ['logs', { page, page_size: PAGE_SIZE, q: committed }],
     queryFn: () => listLogs({ page, page_size: PAGE_SIZE, q: committed || undefined }),
   });
+
+  useAutoRefresh(() => {
+    void refetch();
+  }, 5000);
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / PAGE_SIZE));
 

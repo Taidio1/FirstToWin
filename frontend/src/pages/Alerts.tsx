@@ -12,10 +12,13 @@ import { SeverityBadge } from '@/components/alerts/SeverityBadge';
 import { StatusBadge } from '@/components/alerts/StatusBadge';
 import { AlertDetail } from '@/components/alerts/AlertDetail';
 import { listAlerts, patchAlertStatus } from '@/services/alerts';
+import { createRule } from '@/services/rules';
 import { extractError } from '@/services/api';
 import { useToast } from '@/contexts/ToastContext';
 import { AlertItem, AlertStatus, Severity } from '@/types';
 import { timeAgo } from '@/lib/utils';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { useLiveAlertPulse } from '@/hooks/useRealtimeAlerts';
 
 const PAGE_SIZE = 20;
 
@@ -30,6 +33,7 @@ export default function Alerts() {
     (params.get('status') as AlertStatus) || ''
   );
   const [active, setActive] = useState<AlertItem | null>(null);
+  const freshAlertId = useLiveAlertPulse();
 
   const focusId = params.get('focus');
   const qc = useQueryClient();
@@ -51,12 +55,33 @@ export default function Alerts() {
     queryFn: () => listAlerts(filters),
   });
 
+  useAutoRefresh(() => {
+    void refetch();
+  }, 5000);
+
   useEffect(() => {
     if (focusId && data) {
       const found = data.items.find((a) => a.id === Number(focusId));
       if (found) setActive(found);
     }
   }, [focusId, data]);
+
+  const blacklistMutation = useMutation({
+    mutationFn: (srcIp: string) =>
+      createRule({
+        name: `Block ${srcIp}`,
+        type: 'blacklist_ip',
+        enabled: true,
+        severity: 'critical',
+        match: { src_ip: srcIp, protocol: 'TCP' },
+        description: `Auto-generated blacklist rule for ${srcIp}.`,
+      }),
+    onSuccess: (rule) => {
+      qc.invalidateQueries({ queryKey: ['rules'] });
+      toast.success('Rule created', `${rule.name} added to blacklist.`);
+    },
+    onError: (err) => toast.error('Could not create rule', extractError(err)),
+  });
 
   const patchMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: AlertStatus }) =>
@@ -162,7 +187,10 @@ export default function Alerts() {
               {data?.items.map((a) => (
                 <tr
                   key={a.id}
-                  className="cursor-pointer transition-colors hover:bg-ink-800/40"
+                  className={
+                    'cursor-pointer transition-colors hover:bg-ink-800/40 ' +
+                    (freshAlertId === a.id ? 'live-row-pulse' : '')
+                  }
                   onClick={() => setActive(a)}
                 >
                   <td className="whitespace-nowrap px-5 py-3.5">
@@ -178,8 +206,22 @@ export default function Alerts() {
                     <span className="text-slate-200">{a.dst_ip}</span>
                     <span className="ml-2 text-slate-500">{a.protocol}</span>
                   </td>
-                  <td className="whitespace-nowrap px-5 py-3.5">
-                    <StatusBadge status={a.status} />
+                  <td
+                    className="whitespace-nowrap px-5 py-3.5"
+                    title="Click to advance status"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const next: Record<string, AlertStatus> = {
+                        open: 'acknowledged',
+                        acknowledged: 'resolved',
+                        resolved: 'open',
+                      };
+                      patchMutation.mutate({ id: a.id, status: next[a.status] as AlertStatus });
+                    }}
+                  >
+                    <span className="cursor-pointer rounded hover:opacity-75 transition-opacity">
+                      <StatusBadge status={a.status} />
+                    </span>
                   </td>
                   <td className="whitespace-nowrap px-5 py-3.5 text-xs text-slate-400">
                     {timeAgo(a.created_at)}
@@ -221,7 +263,9 @@ export default function Alerts() {
         alert={active}
         onClose={() => setActive(null)}
         onChangeStatus={(id, status) => patchMutation.mutate({ id, status })}
+        onAddToBlacklist={(srcIp) => blacklistMutation.mutate(srcIp)}
         saving={patchMutation.isPending}
+        blacklisting={blacklistMutation.isPending}
       />
     </div>
   );

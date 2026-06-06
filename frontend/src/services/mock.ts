@@ -5,8 +5,11 @@ import {
   OsintReport,
   Paginated,
   Rule,
+  RuleSummary,
+  ScenarioSummary,
   Sensor,
   Severity,
+  TopIpReport,
   User,
 } from '@/types';
 
@@ -167,6 +170,8 @@ function randomAlert(): AlertItem {
         : `Threshold exceeded for rule "${rule.name}" — see details`,
     created_at: new Date(Date.now() - Math.floor(Math.random() * 24 * 3600_000)).toISOString(),
     sensor_id: `sensor-${Math.ceil(Math.random() * 4).toString().padStart(2, '0')}`,
+    count: Math.floor(Math.random() * 5) + 1,
+    last_seen: Math.random() < 0.5 ? new Date(Date.now() - Math.floor(Math.random() * 3600_000)).toISOString() : null,
     osint:
       Math.random() < 0.4
         ? {
@@ -192,6 +197,44 @@ function delay<T>(value: T, ms = 220): Promise<T> {
 }
 
 export const mock = {
+  async topIps(): Promise<TopIpReport[]> {
+    return delay([
+      { src_ip: '10.10.40.18', alerts_count: 6, hits_count: 28, critical_alerts: 6,
+        high_alerts: 0, rules_count: 1, risk_score: 24.6,
+        first_seen: '2026-05-20T09:11:00Z', last_seen: '2026-05-26T22:04:00Z' },
+      { src_ip: '10.10.30.23', alerts_count: 5, hits_count: 22, critical_alerts: 0,
+        high_alerts: 5, rules_count: 1, risk_score: 15.4,
+        first_seen: '2026-05-20T09:11:00Z', last_seen: '2026-05-25T18:30:00Z' },
+      { src_ip: '203.0.113.66', alerts_count: 3, hits_count: 3, critical_alerts: 3,
+        high_alerts: 0, rules_count: 1, risk_score: 10.6,
+        first_seen: '2026-05-21T11:00:00Z', last_seen: '2026-05-24T08:00:00Z' },
+    ]);
+  },
+
+  async rulesSummary(): Promise<RuleSummary[]> {
+    return delay([
+      { rule_name: 'SSH Brute Force', severity: 'critical', alerts_count: 12, hits_count: 64,
+        src_ip_count: 3, first_seen: '2026-05-20T09:11:00Z', last_seen: '2026-05-26T22:04:00Z' },
+      { rule_name: 'Port Scan', severity: 'high', alerts_count: 14, hits_count: 52,
+        src_ip_count: 3, first_seen: '2026-05-20T09:11:00Z', last_seen: '2026-05-25T18:30:00Z' },
+      { rule_name: 'Blacklist IP', severity: 'critical', alerts_count: 10, hits_count: 10,
+        src_ip_count: 2, first_seen: '2026-05-21T11:00:00Z', last_seen: '2026-05-24T08:00:00Z' },
+    ]);
+  },
+
+  async scenarioSummary(): Promise<ScenarioSummary[]> {
+    return delay([
+      { scenario: 'normal', logs_count: 4900, src_ip_count: 8, dst_ip_count: 5,
+        dst_port_count: 9, avg_payload_size: 812.4, alerts_count: 0 },
+      { scenario: 'ssh-bruteforce', logs_count: 60, src_ip_count: 3, dst_ip_count: 5,
+        dst_port_count: 1, avg_payload_size: 64.0, alerts_count: 12 },
+      { scenario: 'port-scan', logs_count: 78, src_ip_count: 3, dst_ip_count: 5,
+        dst_port_count: 12, avg_payload_size: 64.0, alerts_count: 14 },
+      { scenario: 'blacklist', logs_count: 10, src_ip_count: 2, dst_ip_count: 3,
+        dst_port_count: 3, avg_payload_size: 512.0, alerts_count: 10 },
+    ]);
+  },
+
   async login(email: string): Promise<{ token: string; user: User }> {
     return delay({
       token: 'mock.jwt.token',

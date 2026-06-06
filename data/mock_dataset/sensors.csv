@@ -1,0 +1,4 @@
+id,name,location,status
+1,local-demo-sensor,local demo,online
+2,edge-office-sensor,office edge,online
+3,dmz-sensor,dmz,degraded
