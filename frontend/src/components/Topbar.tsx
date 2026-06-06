@@ -14,7 +14,7 @@ export function Topbar() {
       <div className="flex max-w-md flex-1 items-center gap-3">
         <Search size={16} className="text-slate-500" />
         <Input
-          placeholder="Search alerts, IPs, rules…"
+          placeholder="Szukaj alertów, adresów IP, reguł…"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               const value = (e.target as HTMLInputElement).value;
@@ -30,10 +30,10 @@ export function Topbar() {
         <button
           onClick={() => navigate('/alerts?status=open&severity=critical')}
           className="group flex items-center gap-2 rounded-lg border border-severity-critical/30 bg-severity-critical/10 px-3 py-1.5 text-xs font-medium text-severity-critical transition-colors hover:bg-severity-critical/20"
-          title="Open critical alerts"
+          title="Otwarte krytyczne alerty"
         >
           <ShieldAlert size={14} />
-          Active threats
+          Aktywne zagrożenia
         </button>
 
         <div className="relative">
@@ -59,7 +59,7 @@ export function Topbar() {
               onMouseLeave={() => setOpen(false)}
             >
               <div className="px-3 py-2 text-[11px] uppercase tracking-wider text-slate-500">
-                Signed in as
+                Zalogowany jako
               </div>
               <div className="border-b border-ink-700/70 px-3 pb-2 text-xs text-slate-200">
                 {user?.email}
@@ -72,7 +72,7 @@ export function Topbar() {
                 className="flex w-full items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-ink-700"
               >
                 <LogOut size={13} />
-                Log out
+                Wyloguj
               </button>
             </div>
           )}
