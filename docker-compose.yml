@@ -55,9 +55,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  simulator:
+  simulator-port-scan:
     image: python:3.12-slim
-    container_name: ndr-live-simulator
+    container_name: ndr-sim-port-scan
     working_dir: /app
     volumes:
       - ./scripts:/app/scripts:ro
@@ -65,9 +65,49 @@ services:
     environment:
       LIVE_BACKEND_URL: http://backend:8000
       LIVE_SENSOR_KEY: demo-sensor-key
-      LIVE_NORMAL_INTERVAL_SECONDS: 5
+      LIVE_NORMAL_INTERVAL_SECONDS: 10
       LIVE_THREAT_INTERVAL_SECONDS: 30
-      LIVE_THREAT_TYPES: port-scan,ssh-bruteforce,blacklist
+      LIVE_THREAT_TYPES: port-scan
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles:
+      - live
+    restart: unless-stopped
+
+  simulator-ssh-bruteforce:
+    image: python:3.12-slim
+    container_name: ndr-sim-ssh-bruteforce
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts:ro
+    command: python scripts/live_simulator.py
+    environment:
+      LIVE_BACKEND_URL: http://backend:8000
+      LIVE_SENSOR_KEY: demo-sensor-key
+      LIVE_NORMAL_INTERVAL_SECONDS: 10
+      LIVE_THREAT_INTERVAL_SECONDS: 45
+      LIVE_THREAT_TYPES: ssh-bruteforce
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles:
+      - live
+    restart: unless-stopped
+
+  simulator-blacklist:
+    image: python:3.12-slim
+    container_name: ndr-sim-blacklist
+    working_dir: /app
+    volumes:
+      - ./scripts:/app/scripts:ro
+    command: python scripts/live_simulator.py
+    environment:
+      LIVE_BACKEND_URL: http://backend:8000
+      LIVE_SENSOR_KEY: demo-sensor-key
+      LIVE_NORMAL_INTERVAL_SECONDS: 10
+      LIVE_THREAT_INTERVAL_SECONDS: 60
+      LIVE_THREAT_TYPES: blacklist
     depends_on:
       backend:
         condition: service_healthy

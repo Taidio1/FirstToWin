@@ -12,6 +12,7 @@ const Rules = lazy(() => import('@/pages/Rules'));
 const Sensors = lazy(() => import('@/pages/Sensors'));
 const Logs = lazy(() => import('@/pages/Logs'));
 const AttackLab = lazy(() => import('@/pages/AttackLab'));
+const Reports = lazy(() => import('@/pages/Reports'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/rules" element={<Rules />} />
             <Route path="/sensors" element={<Sensors />} />
             <Route path="/logs" element={<Logs />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="/attack-lab" element={<AttackLab />} />
             <Route path="*" element={<NotFound />} />
           </Route>

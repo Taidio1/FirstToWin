@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import {
   Activity,
   AlertTriangle,
+  BarChart3,
   Cpu,
   FlaskConical,
   LayoutDashboard,
@@ -17,6 +18,7 @@ const items = [
   { to: '/rules', label: 'Detection rules', icon: ShieldCheck },
   { to: '/sensors', label: 'Sensors', icon: Cpu },
   { to: '/logs', label: 'Network logs', icon: ScrollText },
+  { to: '/reports', label: 'Analityka', icon: BarChart3 },
   { to: '/attack-lab', label: 'Attack Lab', icon: FlaskConical },
 ];
 

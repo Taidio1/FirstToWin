@@ -118,3 +118,35 @@ export interface Paginated<T> {
   page: number;
   page_size: number;
 }
+
+export interface TopIpReport {
+  src_ip: string;
+  alerts_count: number;
+  hits_count: number;
+  critical_alerts: number;
+  high_alerts: number;
+  rules_count: number;
+  risk_score: number;
+  first_seen: string | null;
+  last_seen: string | null;
+}
+
+export interface RuleSummary {
+  rule_name: string;
+  severity: Severity;
+  alerts_count: number;
+  hits_count: number;
+  src_ip_count: number;
+  first_seen: string | null;
+  last_seen: string | null;
+}
+
+export interface ScenarioSummary {
+  scenario: string;
+  logs_count: number;
+  src_ip_count: number;
+  dst_ip_count: number;
+  dst_port_count: number;
+  avg_payload_size: number | null;
+  alerts_count: number;
+}
